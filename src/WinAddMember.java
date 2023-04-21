@@ -14,12 +14,18 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.util.Calendar;
+import java.util.Vector;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class WinAddMember extends JDialog {
 	private JTextField tfName;
@@ -139,6 +145,15 @@ public class WinAddMember extends JDialog {
 		getContentPane().add(lblAddress);
 		
 		JButton btnSearch = new JButton("도로명 찾기...");
+		btnSearch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				WinSearchDoro winSearchDoro = new WinSearchDoro();
+				winSearchDoro.setModal(true);
+				winSearchDoro.setVisible(true);
+				tfAddress.setText(winSearchDoro.getAddress() + " ");
+				tfAddress.requestFocus();
+			}
+		});
 		btnSearch.setBounds(354, 219, 109, 23);
 		getContentPane().add(btnSearch);
 		
@@ -210,6 +225,15 @@ public class WinAddMember extends JDialog {
 		
 		String sql = sName+","+sMobile+","+sEmail+","+sBirth+","+sGradYear+",";
 		sql = sql+sAddress+","+sPath;
-		System.out.println(sql);
+		
+		try {					
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/sqlDB","root","1234");
+			Statement stmt = con.prepareStatement(sql);
+			// 여기서부터
+
+		} catch(ClassNotFoundException | SQLException e1) {
+			e1.printStackTrace();
+		}
 	}
 }
