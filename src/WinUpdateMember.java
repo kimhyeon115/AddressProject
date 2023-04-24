@@ -7,43 +7,42 @@ import javax.swing.JOptionPane;
 
 import java.awt.Color;
 import javax.swing.JTextField;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
-
-import java.awt.Font;
-import java.awt.Image;
-
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
-import java.awt.event.ActionListener;
-import java.util.Calendar;
-import java.util.Vector;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import java.awt.Font;
+import java.awt.Image;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Calendar;
+
+import javax.swing.DefaultComboBoxModel;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-public class WinAddMember extends JDialog {
+public class WinUpdateMember extends JDialog {
 	private JTextField tfName;
 	private JTextField tfMobile2;
 	private JTextField tfEmailId;
 	private JTextField tfBirth;
 	private JTextField tfAddress;
 	private JTextField tfMobile3;
+	private JComboBox cbEmailCompany;
 	private JComboBox cbMobile1;
 	private JComboBox cbGradYear;
-	private JComboBox cbEmailCompany;
-	protected String filePath;
+	private JLabel lblAddress;
 	private JLabel lblPic;
+	protected String filePath;
+	private int gId;
 
 	/**
 	 * Launch the application.
@@ -52,7 +51,7 @@ public class WinAddMember extends JDialog {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					WinAddMember dialog = new WinAddMember();
+					WinUpdateMember dialog = new WinUpdateMember();
 					dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 					dialog.setVisible(true);
 				} catch (Exception e) {
@@ -65,15 +64,13 @@ public class WinAddMember extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public WinAddMember() {
-		setTitle("회원등록");
-		setBounds(100, 100, 490, 353);
+	public WinUpdateMember() {
+		setTitle("회원 정보 변경");
+		setBounds(100, 100, 489, 357);
 		getContentPane().setLayout(null);
 		
 		lblPic = new JLabel("");
 		lblPic.addMouseListener(new MouseAdapter() {
-			
-			@Override
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount() == 2) {
 					JFileChooser chooser = new JFileChooser("C:\\rlagus\\");
@@ -89,12 +86,12 @@ public class WinAddMember extends JDialog {
 						icon = new ImageIcon(image);
 						lblPic.setIcon(icon);						
 					}
-				}
+				}				
 			}
 		});
 		lblPic.setToolTipText("더블클릭해서 사진 선택하시오.");
 		lblPic.setOpaque(true);
-		lblPic.setBackground(new Color(255, 255, 0));
+		lblPic.setBackground(Color.YELLOW);
 		lblPic.setBounds(12, 10, 120, 140);
 		getContentPane().add(lblPic);
 		
@@ -104,22 +101,22 @@ public class WinAddMember extends JDialog {
 		
 		tfName = new JTextField();
 		tfName.addKeyListener(new KeyAdapter() {
-			@Override
 			public void keyPressed(KeyEvent e) {
-				if(e.getKeyCode()==KeyEvent.VK_ENTER)
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
 					tfMobile2.requestFocus();
+				}
 			}
 		});
+		tfName.setColumns(10);
 		tfName.setBounds(225, 24, 136, 21);
 		getContentPane().add(tfName);
-		tfName.setColumns(10);
 		
 		tfMobile2 = new JTextField();
 		tfMobile2.addKeyListener(new KeyAdapter() {
-			@Override
 			public void keyPressed(KeyEvent e) {
-				if(e.getKeyCode()==KeyEvent.VK_ENTER)
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
 					tfMobile3.requestFocus();
+				}
 			}
 		});
 		tfMobile2.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -132,13 +129,6 @@ public class WinAddMember extends JDialog {
 		getContentPane().add(lblMobile);
 		
 		tfEmailId = new JTextField();
-		tfEmailId.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if(e.getKeyCode()==KeyEvent.VK_ENTER)
-					tfBirth.requestFocus();
-			}
-		});
 		tfEmailId.setColumns(10);
 		tfEmailId.setBounds(225, 114, 93, 21);
 		getContentPane().add(tfEmailId);
@@ -148,18 +138,6 @@ public class WinAddMember extends JDialog {
 		getContentPane().add(lblEmail);
 		
 		tfBirth = new JTextField();
-		tfBirth.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
-					WinCalendar winCalendar = new WinCalendar();
-					winCalendar.setModal(true);
-					winCalendar.setVisible(true);
-					tfBirth.setText(winCalendar.getDate());
-					tfAddress.requestFocus();
-				}
-			}
-		});
 		tfBirth.setHorizontalAlignment(SwingConstants.RIGHT);
 		tfBirth.setColumns(10);
 		tfBirth.setBounds(225, 146, 136, 21);
@@ -174,22 +152,11 @@ public class WinAddMember extends JDialog {
 		getContentPane().add(lblGradYear);
 		
 		tfAddress = new JTextField();
-		tfAddress.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if(e.getKeyCode() == KeyEvent.VK_ENTER)
-					if(isOK()) {
-						insertRecord();
-						clearAll();
-					}else
-						JOptionPane.showMessageDialog(null, "필수 입력을 확인하세요\n이름, 전화번호,이메일,생년월일,주소");
-			}
-		});
 		tfAddress.setColumns(10);
 		tfAddress.setBounds(57, 220, 285, 21);
 		getContentPane().add(tfAddress);
 		
-		JLabel lblAddress = new JLabel("주소:");
+		lblAddress = new JLabel("주소:");
 		lblAddress.setBounds(12, 223, 57, 15);
 		getContentPane().add(lblAddress);
 		
@@ -219,22 +186,24 @@ public class WinAddMember extends JDialog {
 		btnCalendar.setBounds(373, 145, 74, 23);
 		getContentPane().add(btnCalendar);
 		
-		JButton btnInsert = new JButton("회원 가입");
-		btnInsert.addActionListener(new ActionListener() {
+		JButton btnUpdate = new JButton("정보 수정");
+		btnUpdate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(isOK()) {
-					insertRecord();
-					clearAll();
-				}else
-					JOptionPane.showMessageDialog(null, "필수 입력을 확인하세요\n이름, 전화번호,이메일,생년월일,주소");
+				updateRecord();
 			}
 		});
-		btnInsert.setBounds(57, 248, 135, 45);
-		getContentPane().add(btnInsert);
+		btnUpdate.setBounds(187, 251, 95, 30);
+		getContentPane().add(btnUpdate);
 		
 		cbGradYear = new JComboBox();
 		cbGradYear.setBounds(225, 185, 136, 23);
 		getContentPane().add(cbGradYear);
+		
+		Calendar cal = Calendar.getInstance();
+		int year = cal.get(Calendar.YEAR);
+		for(int i=2000; i <= year; i++)
+			cbGradYear.addItem(i);
+		cbGradYear.setSelectedItem(year);
 		
 		cbMobile1 = new JComboBox();
 		cbMobile1.setModel(new DefaultComboBoxModel(new String[] {"010", "02", "031", "032", "033", "041", "042", "043", "044", "051", "052", "053", "054", "055", "061", "062", "063", "064"}));
@@ -244,8 +213,9 @@ public class WinAddMember extends JDialog {
 		tfMobile3 = new JTextField();
 		tfMobile3.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
-				if(e.getKeyCode()==KeyEvent.VK_ENTER)
-					tfEmailId.requestFocus();
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+					btnCalendar.requestFocus();
+				}
 			}
 		});
 		tfMobile3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -260,85 +230,85 @@ public class WinAddMember extends JDialog {
 		
 		cbEmailCompany = new JComboBox();
 		cbEmailCompany.setEditable(true);
-		cbEmailCompany.setModel(new DefaultComboBoxModel(new String[] {"naver.com", "daum.net", "gmail.com", "nate.com", "ici.or.kr", "직접입력"}));
 		cbEmailCompany.setBounds(348, 113, 115, 23);
 		getContentPane().add(cbEmailCompany);
-		
-		//===================================
-		Calendar cal = Calendar.getInstance();
-		int year = cal.get(Calendar.YEAR);
-		for(int i=2000; i <= year; i++)
-			cbGradYear.addItem(i);
-		cbGradYear.setSelectedItem(year);
-		
-		JButton btnExit = new JButton("종료");
-		btnExit.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				dispose();
-			}
-		});
-		btnExit.setBounds(247, 251, 95, 42);
-		getContentPane().add(btnExit);
+
 	}
 
-	protected void clearAll() {
-		tfName.setText("");
-		tfMobile2.setText("");
-		tfMobile3.setText("");
-		tfEmailId.setText("");
-		tfBirth.setText("");
-		tfAddress.setText("");
-		tfName.requestFocus();
-		
-		filePath = "C:\\rlagus\\sample.jpg";
-		ImageIcon icon = new ImageIcon(filePath);
-		Image image = icon.getImage();
-		image = image.getScaledInstance(120, 140, Image.SCALE_SMOOTH);
-		icon = new ImageIcon(image);
-		lblPic.setIcon(icon);	
+	protected void updateRecord() {
+		try {
+			String sName = tfName.getText();
+			String sMobile = cbMobile1.getSelectedItem().toString() + tfMobile2.getText() + tfMobile3.getText();
+			String sEmail = tfEmailId.getText() + "@" + cbEmailCompany.getSelectedItem();
+			String sBirth = tfBirth.getText();
+			String sGradYear = cbGradYear.getSelectedItem().toString();
+			String sAddress = tfAddress.getText();
+			String sPath = filePath;
+			
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/sqlDB","root","1234");						
+			Statement stmt = con.createStatement();
+			
+			String sql = "update addrtbl set name='"+sName+"',mobile='"+sMobile+"',email='"+sEmail+"',address='";
+			sql = sql + sAddress+"',birth='"+sBirth+"',gradYear='"+sGradYear+"',pic='"+sPath+"'";
+			sql = sql + " where idx="+gId; 
+			
+			if(stmt.executeUpdate(sql) < 1) {
+				JOptionPane.showConfirmDialog(null, "변경되지 않았습니다");
+			}			
+		} catch (ClassNotFoundException | SQLException e1) {
+			e1.printStackTrace();
+		}
+		dispose();
+	}
+	public WinUpdateMember(int id) {
+		this();
+		setTitle("회원 정보 변경: " + id);
+		gId = id;
+		showRecord(id);		// showRecordID(id)와 WinAddMember 클래스 이용	
 	}
 
-	protected boolean isOK() {
-		boolean bOK = true;
-		if(tfName.getText().equals(""))
-			bOK = false;
-		else if(tfMobile2.getText().equals(""))
-			bOK = false;
-		else if(tfMobile3.getText().equals(""))
-			bOK = false;
-		else if(tfEmailId.getText().equals(""))
-			bOK = false;
-		else if(tfBirth.getText().equals(""))
-			bOK = false;
-		else if(tfAddress.getText().equals(""))
-			bOK = false;
-		return bOK;
-	}
-
-	protected void insertRecord() {
-		String sName = tfName.getText();
-		String sMobile = cbMobile1.getSelectedItem().toString() + tfMobile2.getText() + tfMobile3.getText();
-		String sEmail = tfEmailId.getText() + "@" + cbEmailCompany.getSelectedItem();
-		String sBirth = tfBirth.getText();
-		String sGradYear = cbGradYear.getSelectedItem().toString();
-		String sAddress = tfAddress.getText();
-		String sPath = filePath;
-		
+	private void showRecord(int id) {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/sqlDB","root","1234");						
 			Statement stmt = con.createStatement();
 			
-			String sql = "insert into addrtbl values(null,'" + sName + "','" + sMobile + "','";  
-			sql = sql + sEmail + "','" + sAddress + "','" + sBirth + "'," + sGradYear + ",'" + sPath + "')";
+			String sql = "select * from addrtbl where idx = " + id;
 			
-			if(stmt.executeUpdate(sql) < 1)
-				JOptionPane.showMessageDialog(null, "회원 가입 오류!!");
-			
-			
+			ResultSet rs = stmt.executeQuery(sql);
+			while(rs.next()) {				
+				tfName.setText(rs.getString("name"));							
+				tfAddress.setText(rs.getString("address"));
+				tfBirth.setText(rs.getString("birth"));
+				cbGradYear.setSelectedItem(rs.getInt("gradYear"));
+				
+				filePath = rs.getString("pic");
+				filePath = filePath.replaceAll("\\\\", "\\\\\\\\");
+				ImageIcon icon = new ImageIcon(filePath);
+				Image image = icon.getImage();
+				image = image.getScaledInstance(120, 140, Image.SCALE_SMOOTH);
+				icon = new ImageIcon(image);
+				lblPic.setIcon(icon);
+				
+				String sEmail[] = rs.getString("email").split("@");
+				tfEmailId.setText(sEmail[0]);
+				cbEmailCompany.setSelectedItem(sEmail[1]);
+				
+				String sMobile = rs.getString("mobile");
+				if(sMobile.substring(0, 2).equals("02")) {
+					cbMobile1.setSelectedItem("02");  //021234567
+					tfMobile2.setText(sMobile.substring(2,sMobile.length()-4));
+					tfMobile3.setText(sMobile.substring(sMobile.length()-4));
+				}else {
+					cbMobile1.setSelectedItem(sMobile.substring(0, 3));  //010 1234 4567, 032-525-1234
+					tfMobile2.setText(sMobile.substring(3,sMobile.length()-4));
+					tfMobile3.setText(sMobile.substring(sMobile.length()-4));
+				}					
+			}			
 		} catch (ClassNotFoundException | SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}	
+		}
 	}
 }

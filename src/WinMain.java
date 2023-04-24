@@ -8,6 +8,8 @@ import javax.swing.JButton;
 import javax.swing.ImageIcon;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class WinMain extends JDialog {
 
@@ -61,6 +63,14 @@ public class WinMain extends JDialog {
 		getContentPane().add(btnDrop);
 		
 		JButton btnAlter = new JButton("");
+		btnAlter.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				WinMultiSearch winUpdateSearch = new WinMultiSearch();
+				winUpdateSearch.setModal(true);
+				winUpdateSearch.setVisible(true);
+			}
+		});
+		
 		ImageIcon icon1 = new ImageIcon(WinMain.class.getResource("/images/update.png"));
 		Image image1 = icon1.getImage();
 		image1 = image1.getScaledInstance(120, 120, Image.SCALE_SMOOTH);
@@ -69,6 +79,13 @@ public class WinMain extends JDialog {
 		getContentPane().add(btnAlter);
 		
 		JButton btnSearch = new JButton("");		
+		btnSearch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				WinSearchResult2 winSearchResult2 = new WinSearchResult2();
+				winSearchResult2.setModal(true);
+				winSearchResult2.setVisible(true);
+			}
+		});
 		btnSearch.setIcon(new ImageIcon(WinMain.class.getResource("/images/search.png")));
 		getContentPane().add(btnSearch);
 
